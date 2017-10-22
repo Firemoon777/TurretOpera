@@ -79,15 +79,13 @@ namespace TurretOpera
             lastLocation = new Point(this.Location.X, this.Location.Y);
             this.LocationChanged += Turret_LocationChanged;
             this.KeyPreview = true;
-            eye.GotFocus += Turret_GotFocus;
+            this.Activated += Turret_GotFocus;
+            
         }
 
         void Turret_GotFocus(object sender, EventArgs e)
         {
-            leftGun.BringToFront();
-            rightGun.BringToFront();
-            tripod.BringToFront();
-            this.BringToFront();
+
         }
 
         void Turret_LocationChanged(object sender, EventArgs e)
@@ -96,9 +94,9 @@ namespace TurretOpera
 
             IntPtr info = WinAPI.BeginDeferWindowPos(5);
 
-            WinAPI.DeferWindowPos(info, tripod.Handle, 0, tripod.Location.X + relativeChange.X, tripod.Location.Y + relativeChange.Y, 0, 0, WinAPI.SWP_NOSIZE | WinAPI.SWP_NOZORDER | WinAPI.SWP_SHOWWINDOW);
-            WinAPI.DeferWindowPos(info, leftGun.Handle, 0, leftGun.Location.X + relativeChange.X, leftGun.Location.Y + relativeChange.Y, 0, 0, WinAPI.SWP_NOSIZE | WinAPI.SWP_NOZORDER | WinAPI.SWP_SHOWWINDOW);
-            WinAPI.DeferWindowPos(info, rightGun.Handle, 0, rightGun.Location.X + relativeChange.X, rightGun.Location.Y + relativeChange.Y, 0, 0, WinAPI.SWP_NOSIZE | WinAPI.SWP_NOZORDER | WinAPI.SWP_SHOWWINDOW);
+            WinAPI.DeferWindowPos(info, tripod.Handle, IntPtr.Zero, tripod.Location.X + relativeChange.X, tripod.Location.Y + relativeChange.Y, 0, 0, WinAPI.SWP_NOSIZE | WinAPI.SWP_NOZORDER | WinAPI.SWP_SHOWWINDOW);
+            WinAPI.DeferWindowPos(info, leftGun.Handle, IntPtr.Zero, leftGun.Location.X + relativeChange.X, leftGun.Location.Y + relativeChange.Y, 0, 0, WinAPI.SWP_NOSIZE | WinAPI.SWP_NOZORDER | WinAPI.SWP_SHOWWINDOW);
+            WinAPI.DeferWindowPos(info, rightGun.Handle, IntPtr.Zero, rightGun.Location.X + relativeChange.X, rightGun.Location.Y + relativeChange.Y, 0, 0, WinAPI.SWP_NOSIZE | WinAPI.SWP_NOZORDER | WinAPI.SWP_SHOWWINDOW);
 
             WinAPI.EndDeferWindowPos(info);
 
@@ -107,6 +105,11 @@ namespace TurretOpera
 
         void Turret_MouseDown(object sender, MouseEventArgs e)
         {
+            WinAPI.PlaySound("pickup.wav", UIntPtr.Zero, WinAPI.SND_FILENAME | WinAPI.SND_ASYNC);
+            eye.BackgroundImage = Properties.Resources.eye_enabled;
+            setPosition(this, leftGun, 0, 0);
+            setPosition(this, rightGun, 0, 0);
+
             WinAPI.ReleaseCapture();
             WinAPI.SendMessage(this.Handle, WinAPI.WM_NCLBUTTONDOWN, new IntPtr(WinAPI.HT_CAPTION), IntPtr.Zero);
         }
@@ -123,9 +126,15 @@ namespace TurretOpera
             {
                 x = -40;
             }
-            setPosition(this, rightGun, x, 0);
+            IntPtr info = WinAPI.BeginDeferWindowPos(5);
+
+            setPosition(info, this, rightGun, x, 0);
             x = rnd.Next(0, 40);
-            setPosition(this, leftGun, x, 0);
+            setPosition(info, this, leftGun, x, 0);
+            setTop(info, this, leftGun);
+
+            WinAPI.EndDeferWindowPos(info);
+            this.BringToFront();
         }
 
         Form commonSetup(Bitmap bitmapRgn, Bitmap bg)
@@ -147,6 +156,16 @@ namespace TurretOpera
             }
 
             return form;
+        }
+
+        void setPosition(IntPtr info, Form head, Form part, int x, int y)
+        {
+            WinAPI.DeferWindowPos(info, part.Handle, this.Handle, head.Bounds.X + x, head.Bounds.Y + y, 0, 0, WinAPI.SWP_NOSIZE);   
+        }
+
+        void setTop(IntPtr info, Form form, Form after)
+        {
+            WinAPI.DeferWindowPos(info, form.Handle, after.Handle, 0, 0, 0, 0, WinAPI.SWP_NOMOVE | WinAPI.SWP_NOSIZE | WinAPI.SWP_SHOWWINDOW);
         }
 
         void setPosition(Form head, Form part, int x, int y)

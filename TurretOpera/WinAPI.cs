@@ -50,7 +50,7 @@ namespace TurretOpera
         [DllImport("user32.dll")]
         public static extern IntPtr BeginDeferWindowPos(int nNumWindows);
         [DllImport("user32.dll")]
-        public static extern IntPtr DeferWindowPos(IntPtr hWinPosInfo, IntPtr hWnd, int hWndInsertAfter, int x, int y, int cx, int cy, uint flags);
+        public static extern IntPtr DeferWindowPos(IntPtr hWinPosInfo, IntPtr hWnd, IntPtr hWndInsertAfter, int x, int y, int cx, int cy, uint flags);
         [DllImport("user32.dll")]
         public static extern bool EndDeferWindowPos(IntPtr hWinPosInfo);
 
