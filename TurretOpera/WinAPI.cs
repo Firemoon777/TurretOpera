@@ -29,6 +29,9 @@ namespace TurretOpera
         public const int SWP_NOZORDER = 0x0004;
         public const int SWP_SHOWWINDOW = 0x0040;
         public const int SWP_FRAMECHANGED = 0x0020;
+
+        [DllImport("gdi32.dll")]
+        public static extern IntPtr CreateRoundRectRgn(int x1, int y1, int x2, int y2, int cx, int cy);
     }
 
     class WinAPIHelper

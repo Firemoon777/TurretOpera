@@ -63,6 +63,26 @@ namespace TurretOpera.Properties {
         /// <summary>
         ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap eye_disabled {
+            get {
+                object obj = ResourceManager.GetObject("eye_disabled", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap eye_enabled {
+            get {
+                object obj = ResourceManager.GetObject("eye_enabled", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap turret_head_rgn {
             get {
                 object obj = ResourceManager.GetObject("turret_head_rgn", resourceCulture);
