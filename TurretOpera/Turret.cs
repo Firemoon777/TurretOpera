@@ -46,6 +46,16 @@ namespace TurretOpera
             setPosition(this, tripod, 0, 0);
             tripod.Show();
 
+            // Setup left gun
+            leftGun = commonSetup(Properties.Resources.turret_lgun_rgn, Properties.Resources.turret_lgun_texture);
+            setPosition(this, leftGun, 40, 0);
+            leftGun.Show();
+
+            // Setup right gun
+            rightGun = commonSetup(Properties.Resources.turret_rgun_rgn, Properties.Resources.turret_rgun_texture);
+            setPosition(this, rightGun, -40, 0);
+            rightGun.Show();
+
         }
 
         Form commonSetup(Bitmap bitmapRgn, Bitmap bg)
@@ -71,11 +81,16 @@ namespace TurretOpera
             if (this.eye_enabled)
             {
                 this.eye.BackgroundImage = Properties.Resources.eye_enabled;
+                setPosition(this, leftGun, 0, 0);
+                setPosition(this, rightGun, 0, 0);
             }
             else
             {
                 this.eye.BackgroundImage = Properties.Resources.eye_disabled;
+                setPosition(this, leftGun, 40, 0);
+                setPosition(this, rightGun, -40, 0);
             }
+            this.BringToFront();
         }
     }
 }
