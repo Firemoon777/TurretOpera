@@ -83,11 +83,14 @@ namespace TurretOpera
         void Turret_LocationChanged(object sender, EventArgs e)
         {
             Point relativeChange = new Point(this.Location.X - this.lastLocation.X, this.Location.Y - this.lastLocation.Y);
-     
-            WinAPI.SetWindowPos(tripod.Handle, 0, tripod.Location.X + relativeChange.X, tripod.Location.Y + relativeChange.Y, 0, 0, WinAPI.SWP_NOSIZE | WinAPI.SWP_NOZORDER);
-            WinAPI.SetWindowPos(leftGun.Handle, 0, leftGun.Location.X + relativeChange.X, leftGun.Location.Y + relativeChange.Y, 0, 0, WinAPI.SWP_NOSIZE | WinAPI.SWP_NOZORDER);
-            WinAPI.SetWindowPos(rightGun.Handle, 0, rightGun.Location.X + relativeChange.X, rightGun.Location.Y + relativeChange.Y, 0, 0, WinAPI.SWP_NOSIZE | WinAPI.SWP_NOZORDER);
-            //this.BringToFront();
+
+            IntPtr info = WinAPI.BeginDeferWindowPos(5);
+
+            WinAPI.DeferWindowPos(info, tripod.Handle, 0, tripod.Location.X + relativeChange.X, tripod.Location.Y + relativeChange.Y, 0, 0, WinAPI.SWP_NOSIZE | WinAPI.SWP_NOZORDER);
+            WinAPI.DeferWindowPos(info, leftGun.Handle, 0, leftGun.Location.X + relativeChange.X, leftGun.Location.Y + relativeChange.Y, 0, 0, WinAPI.SWP_NOSIZE | WinAPI.SWP_NOZORDER);
+            WinAPI.DeferWindowPos(info, rightGun.Handle, 0, rightGun.Location.X + relativeChange.X, rightGun.Location.Y + relativeChange.Y, 0, 0, WinAPI.SWP_NOSIZE | WinAPI.SWP_NOZORDER);
+
+            WinAPI.EndDeferWindowPos(info);
 
             lastLocation = new Point(this.Location.X, this.Location.Y);
         }

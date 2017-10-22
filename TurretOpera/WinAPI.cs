@@ -46,6 +46,31 @@ namespace TurretOpera
 
         [DllImport("user32.dll")]
         public static extern bool ReleaseCapture();
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr BeginDeferWindowPos(int nNumWindows);
+        [DllImport("user32.dll")]
+        public static extern IntPtr DeferWindowPos(IntPtr hWinPosInfo, IntPtr hWnd, int hWndInsertAfter, int x, int y, int cx, int cy, uint flags);
+        [DllImport("user32.dll")]
+        public static extern bool EndDeferWindowPos(IntPtr hWinPosInfo);
+
+        [DllImport("user32.dll", EntryPoint = "GetWindowLong")]
+        static extern IntPtr GetWindowLongPtr(IntPtr hWnd, int nIndex);
+
+        const int GWL_STYLE = -16;
+        const int GWL_EXSTYLE = -20;
+        const uint WS_THICKFRAME = 0x00040000;
+        const uint WS_MINIMIZE = 0x20000000;
+        const uint WS_MAXIMIZE = 0x01000000;
+        const uint WS_SYSMENU = 0x00080000;
+
+        public static IntPtr SetWindowLongPtr(IntPtr hWnd, int nIndex, IntPtr dwNewLong)
+        {
+            if (IntPtr.Size == 8)
+                return SetWindowLongPtr64(hWnd, nIndex, dwNewLong);
+            else
+                return new IntPtr(SetWindowLong32(hWnd, nIndex, dwNewLong.ToInt32()));
+        }
     }
 
     class WinAPIHelper
