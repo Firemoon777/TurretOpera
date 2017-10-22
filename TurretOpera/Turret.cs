@@ -7,6 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.IO;
+using System.Diagnostics;
 
 namespace TurretOpera
 {
@@ -17,6 +19,9 @@ namespace TurretOpera
         private Form tripod;
         private Button eye;
         private bool eye_enabled = false;
+
+        private Timer timer;
+        private Random rnd;
 
         public Turret()
         {
@@ -56,6 +61,29 @@ namespace TurretOpera
             setPosition(this, rightGun, -40, 0);
             rightGun.Show();
 
+            // Setup timer
+            timer = new Timer();
+            timer.Interval = 300;
+            timer.Tick += timer_Tick;
+            rnd = new Random();
+
+        }
+
+        void timer_Tick(object sender, EventArgs e)
+        {
+            int x;
+            x = (this.Bounds.X - rightGun.Bounds.X) + rnd.Next(-10, 10);
+            if (x > 0)
+            {
+                x = 0;
+            }
+            if (x < -40)
+            {
+                x = -40;
+            }
+            setPosition(this, rightGun, x, 0);
+            x = rnd.Next(0, 40);
+            setPosition(this, leftGun, x, 0);
         }
 
         Form commonSetup(Bitmap bitmapRgn, Bitmap bg)
@@ -67,12 +95,15 @@ namespace TurretOpera
             WinAPI.SetWindowRgn(form.Handle, rgn, true);
             form.SetBounds(0, 0, bitmapRgn.Width, bitmapRgn.Height);
             form.BackgroundImage = bg;
+            form.TopMost = true;
             return form;
         }
 
         void setPosition(Form head, Form part, int x, int y)
         {
-            WinAPI.SetWindowPos(part.Handle, 0, head.Bounds.X + x, head.Bounds.Y + y, 0, 0, WinAPI.SWP_NOSIZE);
+            part.SendToBack();
+            WinAPI.SetWindowPos(part.Handle, 0, head.Bounds.X + x, head.Bounds.Y + y, 0, 0, WinAPI.SWP_NOSIZE | WinAPI.SWP_NOZORDER);
+            head.BringToFront();
         }
 
         void eye_Click(object sender, EventArgs e)
@@ -81,16 +112,16 @@ namespace TurretOpera
             if (this.eye_enabled)
             {
                 this.eye.BackgroundImage = Properties.Resources.eye_enabled;
-                setPosition(this, leftGun, 0, 0);
-                setPosition(this, rightGun, 0, 0);
+                timer.Start();
+                WinAPI.PlaySound("opera.wav", UIntPtr.Zero, WinAPI.SND_ASYNC | WinAPI.SND_FILENAME);
             }
             else
             {
                 this.eye.BackgroundImage = Properties.Resources.eye_disabled;
-                setPosition(this, leftGun, 40, 0);
-                setPosition(this, rightGun, -40, 0);
+                WinAPI.PlaySound(null, UIntPtr.Zero, WinAPI.SND_PURGE);
+                timer.Stop();
             }
-            this.BringToFront();
+            
         }
     }
 }

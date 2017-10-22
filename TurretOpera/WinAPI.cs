@@ -32,6 +32,20 @@ namespace TurretOpera
 
         [DllImport("gdi32.dll")]
         public static extern IntPtr CreateRoundRectRgn(int x1, int y1, int x2, int y2, int cx, int cy);
+
+        [DllImport("winmm.dll", SetLastError = true)]
+        public static extern bool PlaySound(string pszSound, UIntPtr hmod, uint fdwSound);
+        public const uint SND_ASYNC = 0x0001;
+        public const uint SND_PURGE = 0x0040;
+        public const uint SND_FILENAME = 0x00020000;
+
+        [DllImport("coredll.dll")]
+        public static extern IntPtr SendMessage(IntPtr hWnd, int Msg, IntPtr wParam, IntPtr lParam);
+        public const int HT_CAPTION = 0x1;
+        public const int WM_NCLBUTTONDOWN = 0x00A1;
+
+        [DllImport("user32.dll")]
+        static extern bool ReleaseCapture();
     }
 
     class WinAPIHelper
