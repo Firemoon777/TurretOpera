@@ -15,6 +15,9 @@ namespace TurretOpera
         public Turret()
         {
             InitializeComponent();
+            WinAPI.SetWindowPos(this.Handle, 0, 0, 0, 400, 400, WinAPI.SWP_NOMOVE);
+            IntPtr headRgn = WinAPIHelper.createRgnFromBmp(Properties.Resources.turret_head_rgn);
+            WinAPI.SetWindowRgn(this.Handle, headRgn, true);
         }
     }
 }
