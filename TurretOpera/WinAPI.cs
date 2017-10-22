@@ -55,14 +55,21 @@ namespace TurretOpera
         public static extern bool EndDeferWindowPos(IntPtr hWinPosInfo);
 
         [DllImport("user32.dll", EntryPoint = "GetWindowLong")]
-        static extern IntPtr GetWindowLongPtr(IntPtr hWnd, int nIndex);
+        public static extern IntPtr GetWindowLongPtr(IntPtr hWnd, int nIndex);
 
-        const int GWL_STYLE = -16;
-        const int GWL_EXSTYLE = -20;
-        const uint WS_THICKFRAME = 0x00040000;
-        const uint WS_MINIMIZE = 0x20000000;
-        const uint WS_MAXIMIZE = 0x01000000;
-        const uint WS_SYSMENU = 0x00080000;
+        public const int GWL_STYLE = -16;
+        public const int GWL_EXSTYLE = -20;
+        public const uint WS_THICKFRAME = 0x00040000;
+        public const uint WS_MINIMIZE = 0x20000000;
+        public const uint WS_MAXIMIZE = 0x01000000;
+        public const uint WS_SYSMENU = 0x00080000;
+        public const uint WS_EX_TOOLWINDOW = 0x00000080;
+
+        [DllImport("user32.dll", EntryPoint = "SetWindowLong")]
+        private static extern int SetWindowLong32(IntPtr hWnd, int nIndex, int dwNewLong);
+
+        [DllImport("user32.dll", EntryPoint = "SetWindowLongPtr")]
+        private static extern IntPtr SetWindowLongPtr64(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
 
         public static IntPtr SetWindowLongPtr(IntPtr hWnd, int nIndex, IntPtr dwNewLong)
         {

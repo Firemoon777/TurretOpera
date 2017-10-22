@@ -78,6 +78,16 @@ namespace TurretOpera
             // Set magic to move all parts at once
             lastLocation = new Point(this.Location.X, this.Location.Y);
             this.LocationChanged += Turret_LocationChanged;
+            this.KeyPreview = true;
+            eye.GotFocus += Turret_GotFocus;
+        }
+
+        void Turret_GotFocus(object sender, EventArgs e)
+        {
+            leftGun.BringToFront();
+            rightGun.BringToFront();
+            tripod.BringToFront();
+            this.BringToFront();
         }
 
         void Turret_LocationChanged(object sender, EventArgs e)
@@ -86,9 +96,9 @@ namespace TurretOpera
 
             IntPtr info = WinAPI.BeginDeferWindowPos(5);
 
-            WinAPI.DeferWindowPos(info, tripod.Handle, 0, tripod.Location.X + relativeChange.X, tripod.Location.Y + relativeChange.Y, 0, 0, WinAPI.SWP_NOSIZE | WinAPI.SWP_NOZORDER);
-            WinAPI.DeferWindowPos(info, leftGun.Handle, 0, leftGun.Location.X + relativeChange.X, leftGun.Location.Y + relativeChange.Y, 0, 0, WinAPI.SWP_NOSIZE | WinAPI.SWP_NOZORDER);
-            WinAPI.DeferWindowPos(info, rightGun.Handle, 0, rightGun.Location.X + relativeChange.X, rightGun.Location.Y + relativeChange.Y, 0, 0, WinAPI.SWP_NOSIZE | WinAPI.SWP_NOZORDER);
+            WinAPI.DeferWindowPos(info, tripod.Handle, 0, tripod.Location.X + relativeChange.X, tripod.Location.Y + relativeChange.Y, 0, 0, WinAPI.SWP_NOSIZE | WinAPI.SWP_NOZORDER | WinAPI.SWP_SHOWWINDOW);
+            WinAPI.DeferWindowPos(info, leftGun.Handle, 0, leftGun.Location.X + relativeChange.X, leftGun.Location.Y + relativeChange.Y, 0, 0, WinAPI.SWP_NOSIZE | WinAPI.SWP_NOZORDER | WinAPI.SWP_SHOWWINDOW);
+            WinAPI.DeferWindowPos(info, rightGun.Handle, 0, rightGun.Location.X + relativeChange.X, rightGun.Location.Y + relativeChange.Y, 0, 0, WinAPI.SWP_NOSIZE | WinAPI.SWP_NOZORDER | WinAPI.SWP_SHOWWINDOW);
 
             WinAPI.EndDeferWindowPos(info);
 
@@ -128,6 +138,14 @@ namespace TurretOpera
             form.SetBounds(0, 0, bitmapRgn.Width, bitmapRgn.Height);
             form.BackgroundImage = bg;
             form.TopMost = true;
+
+            unsafe
+            {
+                long ptr = (long)WinAPI.GetWindowLongPtr(form.Handle, WinAPI.GWL_EXSTYLE);
+                ptr |= (WinAPI.WS_EX_TOOLWINDOW);
+                WinAPI.SetWindowLongPtr(form.Handle, WinAPI.GWL_EXSTYLE, new IntPtr(ptr));
+            }
+
             return form;
         }
 
