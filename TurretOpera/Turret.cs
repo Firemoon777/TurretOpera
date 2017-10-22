@@ -23,6 +23,8 @@ namespace TurretOpera
         private Timer timer;
         private Random rnd;
 
+        private Point lastLocation;
+
         public Turret()
         {
             InitializeComponent();
@@ -67,6 +69,33 @@ namespace TurretOpera
             timer.Tick += timer_Tick;
             rnd = new Random();
 
+            // Set listeners to all parts
+            this.MouseDown += Turret_MouseDown;
+            tripod.MouseDown += Turret_MouseDown;
+            rightGun.MouseDown += Turret_MouseDown;
+            leftGun.MouseDown += Turret_MouseDown;
+
+            // Set magic to move all parts at once
+            lastLocation = new Point(this.Location.X, this.Location.Y);
+            this.LocationChanged += Turret_LocationChanged;
+        }
+
+        void Turret_LocationChanged(object sender, EventArgs e)
+        {
+            Point relativeChange = new Point(this.Location.X - this.lastLocation.X, this.Location.Y - this.lastLocation.Y);
+     
+            WinAPI.SetWindowPos(tripod.Handle, 0, tripod.Location.X + relativeChange.X, tripod.Location.Y + relativeChange.Y, 0, 0, WinAPI.SWP_NOSIZE | WinAPI.SWP_NOZORDER);
+            WinAPI.SetWindowPos(leftGun.Handle, 0, leftGun.Location.X + relativeChange.X, leftGun.Location.Y + relativeChange.Y, 0, 0, WinAPI.SWP_NOSIZE | WinAPI.SWP_NOZORDER);
+            WinAPI.SetWindowPos(rightGun.Handle, 0, rightGun.Location.X + relativeChange.X, rightGun.Location.Y + relativeChange.Y, 0, 0, WinAPI.SWP_NOSIZE | WinAPI.SWP_NOZORDER);
+            //this.BringToFront();
+
+            lastLocation = new Point(this.Location.X, this.Location.Y);
+        }
+
+        void Turret_MouseDown(object sender, MouseEventArgs e)
+        {
+            WinAPI.ReleaseCapture();
+            WinAPI.SendMessage(this.Handle, WinAPI.WM_NCLBUTTONDOWN, new IntPtr(WinAPI.HT_CAPTION), IntPtr.Zero);
         }
 
         void timer_Tick(object sender, EventArgs e)

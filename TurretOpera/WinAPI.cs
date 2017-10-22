@@ -39,13 +39,13 @@ namespace TurretOpera
         public const uint SND_PURGE = 0x0040;
         public const uint SND_FILENAME = 0x00020000;
 
-        [DllImport("coredll.dll")]
+        [DllImport("user32.dll")]
         public static extern IntPtr SendMessage(IntPtr hWnd, int Msg, IntPtr wParam, IntPtr lParam);
-        public const int HT_CAPTION = 0x1;
-        public const int WM_NCLBUTTONDOWN = 0x00A1;
+        public const int HT_CAPTION = 0x2;
+        public const int WM_NCLBUTTONDOWN = 0xA1;
 
         [DllImport("user32.dll")]
-        static extern bool ReleaseCapture();
+        public static extern bool ReleaseCapture();
     }
 
     class WinAPIHelper
