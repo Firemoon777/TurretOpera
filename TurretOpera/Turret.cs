@@ -51,7 +51,7 @@ namespace TurretOpera
             eye.FlatStyle = FlatStyle.Flat;
             eye.FlatAppearance.BorderSize = 0;
             eye.BackgroundImage = Properties.Resources.eye_disabled;
-            eye.Click += eye_Click;
+            eye.MouseUp += eye_Click;
             this.Controls.Add(eye);
 
             // Setup head
@@ -72,7 +72,7 @@ namespace TurretOpera
             tripod = commonSetup(Properties.Resources.turret_tripod_rgn, Properties.Resources.turret_tripod_texture);
             this.Controls.Add(tripod);
 
-            // Set listeners to all parts
+            // Set move listeners to all parts
             head.MouseDown += Turret_MouseDown;
             tripod.MouseDown += Turret_MouseDown;
             rightGun.MouseDown += Turret_MouseDown;
@@ -96,6 +96,28 @@ namespace TurretOpera
             powerOffTimer = new Timer();
             powerOffTimer.Interval = 2000;
             powerOffTimer.Tick += powerOff;
+        }
+
+        void prepareToRemove(Button b)
+        {
+            b.BackgroundImage = null;
+            b.BackColor = Color.Black;
+        }
+
+        void selfDestruct()
+        {
+            WinAPI.PlaySound("fizz.wav", UIntPtr.Zero, WinAPI.SND_FILENAME | WinAPI.SND_ASYNC);
+            prepareToRemove(head);
+            prepareToRemove(leftGun);
+            prepareToRemove(rightGun);
+            prepareToRemove(tripod);
+            eye.Hide();
+            Timer selfDestructTimer = new Timer();
+            selfDestructTimer.Interval = 2000;
+            selfDestructTimer.Tick += delegate (object _sender, EventArgs _e) {
+                Application.Exit();
+            };
+            selfDestructTimer.Start();
         }
 
         void gravityTimer_Tick(object sender, EventArgs e)
@@ -155,6 +177,13 @@ namespace TurretOpera
 
         void eye_Click(object sender, EventArgs e)
         {
+            MouseEventArgs me = (MouseEventArgs)e;
+            Debug.WriteLine(me.Button);
+            if (me.Button == System.Windows.Forms.MouseButtons.Right)
+            {
+                selfDestruct();
+                return;
+            }
             this.eye_enabled = !this.eye_enabled;
             if (this.eye_enabled)
             {
