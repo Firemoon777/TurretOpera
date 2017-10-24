@@ -14,9 +14,10 @@ namespace TurretOpera
 {
     public partial class Turret : Form
     {
-        private Form leftGun;
-        private Form rightGun;
-        private Form tripod;
+        private Button head;
+        private Button leftGun;
+        private Button rightGun;
+        private Button tripod;
         private Button eye;
         private Button exit;
         private bool eye_enabled = false;
@@ -29,16 +30,19 @@ namespace TurretOpera
         public Turret()
         {
             InitializeComponent();
-            // Create custom region 
+            // Setup form theme
             Bitmap headRgnBmp = Properties.Resources.turret_head_rgn;
             WinAPI.SetWindowPos(this.Handle, 0, 0, 0, headRgnBmp.Width, headRgnBmp.Height, WinAPI.SWP_NOMOVE);
-            IntPtr headRgn = WinAPIHelper.createRgnFromBmp(headRgnBmp);
-            WinAPI.SetWindowRgn(this.Handle, headRgn, true);
-
-            // Setup form theme
-            Bitmap headTextureBmp = Properties.Resources.turret_head_texture;
-            this.BackgroundImage = headTextureBmp;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+
+            // Enable Transparentcy support
+            SetStyle(ControlStyles.SupportsTransparentBackColor, true);
+            this.TransparencyKey = Color.Green;
+            this.BackColor = Color.Green;
+
+            // Setup head
+            head = commonSetup(Properties.Resources.turret_head_rgn, Properties.Resources.turret_head_texture);
+            this.Controls.Add(head);
 
             // Setup eye button
             eye = new Button();
@@ -51,18 +55,15 @@ namespace TurretOpera
 
             // Setup tripod
             tripod = commonSetup(Properties.Resources.turret_tripod_rgn, Properties.Resources.turret_tripod_texture);
-            setPosition(this, tripod, 0, 0);
-            tripod.Show();
+            this.Controls.Add(tripod);
 
             // Setup left gun
             leftGun = commonSetup(Properties.Resources.turret_lgun_rgn, Properties.Resources.turret_lgun_texture);
-            setPosition(this, leftGun, 40, 0);
-            leftGun.Show();
+            this.Controls.Add(leftGun);
 
             // Setup right gun
             rightGun = commonSetup(Properties.Resources.turret_rgun_rgn, Properties.Resources.turret_rgun_texture);
-            setPosition(this, rightGun, -40, 0);
-            rightGun.Show();
+            this.Controls.Add(rightGun);
 
             // Setup timer
             timer = new Timer();
@@ -146,8 +147,6 @@ namespace TurretOpera
         {
             WinAPI.PlaySound("pickup.wav", UIntPtr.Zero, WinAPI.SND_FILENAME | WinAPI.SND_ASYNC);
             eye.BackgroundImage = Properties.Resources.eye_enabled;
-            setPosition(this, leftGun, 0, 0);
-            setPosition(this, rightGun, 0, 0);
 
             WinAPI.ReleaseCapture();
             WinAPI.SendMessage(this.Handle, WinAPI.WM_NCLBUTTONDOWN, new IntPtr(WinAPI.HT_CAPTION), IntPtr.Zero);
@@ -155,7 +154,7 @@ namespace TurretOpera
 
         void timer_Tick(object sender, EventArgs e)
         {
-            int x;
+            /*int x;
             x = (this.Bounds.X - rightGun.Bounds.X) + rnd.Next(-10, 10);
             if (x > 0)
             {
@@ -173,41 +172,31 @@ namespace TurretOpera
             setTop(info, this, leftGun);
 
             WinAPI.EndDeferWindowPos(info);
-            this.BringToFront();
+            this.BringToFront();*/
         }
 
-        Form commonSetup(Bitmap bitmapRgn, Bitmap bg)
+        Button commonSetup(Bitmap bitmapRgn, Bitmap bg)
         {
-            Form form = new Form();
-            form.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-            form.ShowInTaskbar = false;
+            Button form = new Button();
             IntPtr rgn = WinAPIHelper.createRgnFromBmp(bitmapRgn);
             WinAPI.SetWindowRgn(form.Handle, rgn, true);
             form.SetBounds(0, 0, bitmapRgn.Width, bitmapRgn.Height);
             form.BackgroundImage = bg;
-            form.TopMost = true;
-
-            unsafe
-            {
-                long ptr = (long)WinAPI.GetWindowLongPtr(form.Handle, WinAPI.GWL_EXSTYLE);
-                ptr |= (WinAPI.WS_EX_TOOLWINDOW);
-                WinAPI.SetWindowLongPtr(form.Handle, WinAPI.GWL_EXSTYLE, new IntPtr(ptr));
-            }
-
+            form.Location = new Point(0, 0);
             return form;
         }
 
-        void setPosition(IntPtr info, Form head, Form part, int x, int y)
+        void setPosition(IntPtr info, Form head, Button part, int x, int y)
         {
             WinAPI.DeferWindowPos(info, part.Handle, this.Handle, head.Bounds.X + x, head.Bounds.Y + y, 0, 0, WinAPI.SWP_NOSIZE);   
         }
 
-        void setTop(IntPtr info, Form form, Form after)
+        void setTop(IntPtr info, Button form, Button after)
         {
             WinAPI.DeferWindowPos(info, form.Handle, after.Handle, 0, 0, 0, 0, WinAPI.SWP_NOMOVE | WinAPI.SWP_NOSIZE | WinAPI.SWP_SHOWWINDOW);
         }
 
-        void setPosition(Form head, Form part, int x, int y)
+        void setPosition(Form head, Button part, int x, int y)
         {
             part.SendToBack();
             WinAPI.SetWindowPos(part.Handle, 0, head.Bounds.X + x, head.Bounds.Y + y, 0, 0, WinAPI.SWP_NOSIZE | WinAPI.SWP_NOZORDER);
