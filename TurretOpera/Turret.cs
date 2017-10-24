@@ -28,6 +28,10 @@ namespace TurretOpera
         byte[] wavBytes;
         int wavLength;
 
+        Timer gravityTimer;
+        bool inHand = false;
+        Timer powerOffTimer;
+
         public Turret()
         {
             InitializeComponent();
@@ -82,6 +86,26 @@ namespace TurretOpera
             wavBytes = new byte[352750*60*3];
             wavLength = wave.Read(wavBytes, 0, 352750 * 60 * 3);
             Debug.WriteLine("Time = " + wave.CurrentTime);
+
+            // Setup gravity and etc
+            gravityTimer = new Timer();
+            gravityTimer.Interval = 10;
+            gravityTimer.Tick += gravityTimer_Tick;
+            gravityTimer.Start();
+
+            powerOffTimer = new Timer();
+            powerOffTimer.Interval = 2000;
+            powerOffTimer.Tick += powerOff;
+        }
+
+        void gravityTimer_Tick(object sender, EventArgs e)
+        {
+            if (inHand == true)
+                return;
+            if (this.Bounds.Height + this.Bounds.Y + 5 < SystemInformation.VirtualScreen.Height)
+            {
+                WinAPI.SetWindowPos(this.Handle, 0, this.Bounds.X, this.Bounds.Y + 10, 0, 0, WinAPI.SWP_NOZORDER | WinAPI.SWP_NOSIZE);
+            }
         }
 
         long t = 0;
@@ -97,6 +121,8 @@ namespace TurretOpera
 
         void Turret_MouseDown(object sender, MouseEventArgs e)
         {
+            this.inHand = true;
+            powerOffTimer.Stop();
             WinAPI.PlaySound("pickup.wav", UIntPtr.Zero, WinAPI.SND_FILENAME | WinAPI.SND_ASYNC);
             eye.BackgroundImage = Properties.Resources.eye_enabled;
             openLeftGun(100);
@@ -104,6 +130,16 @@ namespace TurretOpera
 
             WinAPI.ReleaseCapture();
             WinAPI.SendMessage(this.Handle, WinAPI.WM_NCLBUTTONDOWN, new IntPtr(WinAPI.HT_CAPTION), IntPtr.Zero);
+
+            this.inHand = false;
+            powerOffTimer.Start();
+        }
+
+        void powerOff(object sender, EventArgs e)
+        {
+            this.eye.BackgroundImage = Properties.Resources.eye_disabled;
+            this.openLeftGun(0);
+            this.openRightGun(0);
         }
 
         Button commonSetup(Bitmap bitmapRgn, Bitmap bg)
