@@ -25,6 +25,7 @@ namespace TurretOpera
 
         Timer soundTimer;
         private readonly string operaWav = "opera.wav";
+        WaveChannel32 wave;
         byte[] wavBytes;
         int wavLength;
 
@@ -82,7 +83,7 @@ namespace TurretOpera
             soundTimer = new Timer();
             soundTimer.Interval = 200;
             soundTimer.Tick += soundTimer_Tick;
-            WaveChannel32 wave = new WaveChannel32(new WaveFileReader(operaWav));
+            wave = new WaveChannel32(new WaveFileReader(operaWav));
             wavBytes = new byte[352750*60*3];
             wavLength = wave.Read(wavBytes, 0, 352750 * 60 * 3);
             Debug.WriteLine("Time = " + wave.CurrentTime);
@@ -135,15 +136,23 @@ namespace TurretOpera
         void soundTimer_Tick(object sender, EventArgs e)
         {
             //Debug.WriteLine(wavBytes[t]);
-            t += 176375 / 5;
-            int data = wavBytes[t] * 100 / 255;
+            t++;
+            int data = wavBytes[t * 176375 / 5] * 100 / 255;
             openLeftGun(data);
-
+            if (t * soundTimer.Interval > wave.TotalTime.TotalMilliseconds)
+            {
+                WinAPI.PlaySound(null, UIntPtr.Zero, WinAPI.SND_PURGE);
+                soundTimer.Stop();
+                openLeftGun(0);
+                openRightGun(0);
+                eye.BackgroundImage = Properties.Resources.eye_disabled;
+            }
         }
 
         void Turret_MouseDown(object sender, MouseEventArgs e)
         {
             this.inHand = true;
+            soundTimer.Stop();
             powerOffTimer.Stop();
             WinAPI.PlaySound("pickup.wav", UIntPtr.Zero, WinAPI.SND_FILENAME | WinAPI.SND_ASYNC);
             eye.BackgroundImage = Properties.Resources.eye_enabled;
@@ -162,6 +171,7 @@ namespace TurretOpera
             this.eye.BackgroundImage = Properties.Resources.eye_disabled;
             this.openLeftGun(0);
             this.openRightGun(0);
+            powerOffTimer.Stop();
         }
 
         Button commonSetup(Bitmap bitmapRgn, Bitmap bg)
@@ -189,6 +199,7 @@ namespace TurretOpera
             {
                 this.eye.BackgroundImage = Properties.Resources.eye_enabled;
                 WinAPI.PlaySound(operaWav, UIntPtr.Zero, WinAPI.SND_ASYNC | WinAPI.SND_FILENAME);
+                t = 0;
                 soundTimer.Start();
             }
             else
@@ -196,6 +207,8 @@ namespace TurretOpera
                 this.eye.BackgroundImage = Properties.Resources.eye_disabled;
                 WinAPI.PlaySound(null, UIntPtr.Zero, WinAPI.SND_PURGE);
                 soundTimer.Stop();
+                openRightGun(0);
+                openLeftGun(0);
             }
             
         }
