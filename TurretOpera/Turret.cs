@@ -18,6 +18,7 @@ namespace TurretOpera
         private Form rightGun;
         private Form tripod;
         private Button eye;
+        private Button exit;
         private bool eye_enabled = false;
 
         private Timer timer;
@@ -80,7 +81,45 @@ namespace TurretOpera
             this.LocationChanged += Turret_LocationChanged;
             this.KeyPreview = true;
             this.Activated += Turret_GotFocus;
+
+            // Exit button
+            exit = new Button();
+            exit.SetBounds(110, 100, 37, 42);
+            eye.FlatStyle = FlatStyle.Flat;
+            exit.FlatAppearance.BorderSize = 0;
+            exit.ForeColor = Color.FromArgb(0, 0, 0, 0);
+            exit.Text = "X";
+            exit.Click += exit_Click;
+            this.Controls.Add(exit);
+
             
+        }
+
+        void exit_Click(object sender, EventArgs e)
+        {
+            Timer killtimer = new Timer();
+            killtimer.Interval = 2000;
+            killtimer.Tick += delegate(object _sender, EventArgs _e)
+            {
+                Application.Exit();
+            };
+            killtimer.Start();
+            WinAPI.PlaySound("fizz.wav", UIntPtr.Zero, WinAPI.SND_ASYNC | WinAPI.SND_FILENAME);
+
+            this.BackgroundImage = null;
+            this.BackColor = Color.Black;
+            eye.Hide();
+            exit.Hide();
+
+            tripod.BackgroundImage = null;
+            tripod.BackColor = Color.Black;
+
+            leftGun.BackgroundImage = null;
+            leftGun.BackColor = Color.Black;
+            rightGun.BackgroundImage = null;
+            rightGun.BackColor = Color.Black;
+
+            //Application.Exit();
         }
 
         void Turret_GotFocus(object sender, EventArgs e)
