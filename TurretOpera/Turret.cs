@@ -32,7 +32,7 @@ namespace TurretOpera
             InitializeComponent();
             // Setup form theme
             Bitmap headRgnBmp = Properties.Resources.turret_head_rgn;
-            WinAPI.SetWindowPos(this.Handle, 0, 0, 0, headRgnBmp.Width, headRgnBmp.Height, WinAPI.SWP_NOMOVE);
+            WinAPI.SetWindowPos(this.Handle, 0, 0, 0, headRgnBmp.Width, headRgnBmp.Height + 20, WinAPI.SWP_NOMOVE);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
 
             // Enable Transparentcy support
@@ -72,16 +72,10 @@ namespace TurretOpera
             rnd = new Random();
 
             // Set listeners to all parts
-            this.MouseDown += Turret_MouseDown;
+            head.MouseDown += Turret_MouseDown;
             tripod.MouseDown += Turret_MouseDown;
             rightGun.MouseDown += Turret_MouseDown;
             leftGun.MouseDown += Turret_MouseDown;
-
-            // Set magic to move all parts at once
-            lastLocation = new Point(this.Location.X, this.Location.Y);
-            this.LocationChanged += Turret_LocationChanged;
-            this.KeyPreview = true;
-            this.Activated += Turret_GotFocus;
 
             // Exit button
             exit = new Button();
@@ -121,11 +115,6 @@ namespace TurretOpera
             rightGun.BackColor = Color.Black;
 
             //Application.Exit();
-        }
-
-        void Turret_GotFocus(object sender, EventArgs e)
-        {
-
         }
 
         void Turret_LocationChanged(object sender, EventArgs e)
