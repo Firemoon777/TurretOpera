@@ -19,13 +19,7 @@ namespace TurretOpera
         private Button rightGun;
         private Button tripod;
         private Button eye;
-        private Button exit;
         private bool eye_enabled = false;
-
-        private Timer timer;
-        private Random rnd;
-
-        private Point lastLocation;
 
         public Turret()
         {
@@ -40,10 +34,6 @@ namespace TurretOpera
             this.TransparencyKey = Color.Green;
             this.BackColor = Color.Green;
 
-            // Setup head
-            head = commonSetup(Properties.Resources.turret_head_rgn, Properties.Resources.turret_head_texture);
-            this.Controls.Add(head);
-
             // Setup eye button
             eye = new Button();
             eye.SetBounds(98, 205, 37, 42);
@@ -53,115 +43,41 @@ namespace TurretOpera
             eye.Click += eye_Click;
             this.Controls.Add(eye);
 
+            // Setup head
+            head = commonSetup(Properties.Resources.turret_head_rgn, Properties.Resources.turret_head_texture);
+            this.Controls.Add(head);
+
             // Setup tripod
             tripod = commonSetup(Properties.Resources.turret_tripod_rgn, Properties.Resources.turret_tripod_texture);
             this.Controls.Add(tripod);
 
             // Setup left gun
             leftGun = commonSetup(Properties.Resources.turret_lgun_rgn, Properties.Resources.turret_lgun_texture);
+            openLeftGun(0);
             this.Controls.Add(leftGun);
 
             // Setup right gun
             rightGun = commonSetup(Properties.Resources.turret_rgun_rgn, Properties.Resources.turret_rgun_texture);
+            openRightGun(0);
             this.Controls.Add(rightGun);
-
-            // Setup timer
-            timer = new Timer();
-            timer.Interval = 300;
-            timer.Tick += timer_Tick;
-            rnd = new Random();
 
             // Set listeners to all parts
             head.MouseDown += Turret_MouseDown;
             tripod.MouseDown += Turret_MouseDown;
             rightGun.MouseDown += Turret_MouseDown;
             leftGun.MouseDown += Turret_MouseDown;
-
-            // Exit button
-            exit = new Button();
-            exit.SetBounds(110, 100, 37, 42);
-            eye.FlatStyle = FlatStyle.Flat;
-            exit.FlatAppearance.BorderSize = 0;
-            exit.ForeColor = Color.FromArgb(0, 0, 0, 0);
-            exit.Text = "X";
-            exit.Click += exit_Click;
-            this.Controls.Add(exit);
-
             
-        }
-
-        void exit_Click(object sender, EventArgs e)
-        {
-            Timer killtimer = new Timer();
-            killtimer.Interval = 2000;
-            killtimer.Tick += delegate(object _sender, EventArgs _e)
-            {
-                Application.Exit();
-            };
-            killtimer.Start();
-            WinAPI.PlaySound("fizz.wav", UIntPtr.Zero, WinAPI.SND_ASYNC | WinAPI.SND_FILENAME);
-
-            this.BackgroundImage = null;
-            this.BackColor = Color.Black;
-            eye.Hide();
-            exit.Hide();
-
-            tripod.BackgroundImage = null;
-            tripod.BackColor = Color.Black;
-
-            leftGun.BackgroundImage = null;
-            leftGun.BackColor = Color.Black;
-            rightGun.BackgroundImage = null;
-            rightGun.BackColor = Color.Black;
-
-            //Application.Exit();
-        }
-
-        void Turret_LocationChanged(object sender, EventArgs e)
-        {
-            Point relativeChange = new Point(this.Location.X - this.lastLocation.X, this.Location.Y - this.lastLocation.Y);
-
-            IntPtr info = WinAPI.BeginDeferWindowPos(5);
-
-            WinAPI.DeferWindowPos(info, tripod.Handle, IntPtr.Zero, tripod.Location.X + relativeChange.X, tripod.Location.Y + relativeChange.Y, 0, 0, WinAPI.SWP_NOSIZE | WinAPI.SWP_NOZORDER | WinAPI.SWP_SHOWWINDOW);
-            WinAPI.DeferWindowPos(info, leftGun.Handle, IntPtr.Zero, leftGun.Location.X + relativeChange.X, leftGun.Location.Y + relativeChange.Y, 0, 0, WinAPI.SWP_NOSIZE | WinAPI.SWP_NOZORDER | WinAPI.SWP_SHOWWINDOW);
-            WinAPI.DeferWindowPos(info, rightGun.Handle, IntPtr.Zero, rightGun.Location.X + relativeChange.X, rightGun.Location.Y + relativeChange.Y, 0, 0, WinAPI.SWP_NOSIZE | WinAPI.SWP_NOZORDER | WinAPI.SWP_SHOWWINDOW);
-
-            WinAPI.EndDeferWindowPos(info);
-
-            lastLocation = new Point(this.Location.X, this.Location.Y);
         }
 
         void Turret_MouseDown(object sender, MouseEventArgs e)
         {
             WinAPI.PlaySound("pickup.wav", UIntPtr.Zero, WinAPI.SND_FILENAME | WinAPI.SND_ASYNC);
             eye.BackgroundImage = Properties.Resources.eye_enabled;
+            openLeftGun(100);
+            openRightGun(100);
 
             WinAPI.ReleaseCapture();
             WinAPI.SendMessage(this.Handle, WinAPI.WM_NCLBUTTONDOWN, new IntPtr(WinAPI.HT_CAPTION), IntPtr.Zero);
-        }
-
-        void timer_Tick(object sender, EventArgs e)
-        {
-            /*int x;
-            x = (this.Bounds.X - rightGun.Bounds.X) + rnd.Next(-10, 10);
-            if (x > 0)
-            {
-                x = 0;
-            }
-            if (x < -40)
-            {
-                x = -40;
-            }
-            IntPtr info = WinAPI.BeginDeferWindowPos(5);
-
-            setPosition(info, this, rightGun, x, 0);
-            x = rnd.Next(0, 40);
-            setPosition(info, this, leftGun, x, 0);
-            setTop(info, this, leftGun);
-
-            WinAPI.EndDeferWindowPos(info);
-            this.BringToFront();*/
         }
 
         Button commonSetup(Bitmap bitmapRgn, Bitmap bg)
@@ -175,39 +91,47 @@ namespace TurretOpera
             return form;
         }
 
-        void setPosition(IntPtr info, Form head, Button part, int x, int y)
-        {
-            WinAPI.DeferWindowPos(info, part.Handle, this.Handle, head.Bounds.X + x, head.Bounds.Y + y, 0, 0, WinAPI.SWP_NOSIZE);   
-        }
-
-        void setTop(IntPtr info, Button form, Button after)
-        {
-            WinAPI.DeferWindowPos(info, form.Handle, after.Handle, 0, 0, 0, 0, WinAPI.SWP_NOMOVE | WinAPI.SWP_NOSIZE | WinAPI.SWP_SHOWWINDOW);
-        }
-
-        void setPosition(Form head, Button part, int x, int y)
-        {
-            part.SendToBack();
-            WinAPI.SetWindowPos(part.Handle, 0, head.Bounds.X + x, head.Bounds.Y + y, 0, 0, WinAPI.SWP_NOSIZE | WinAPI.SWP_NOZORDER);
-            head.BringToFront();
-        }
-
         void eye_Click(object sender, EventArgs e)
         {
             this.eye_enabled = !this.eye_enabled;
             if (this.eye_enabled)
             {
                 this.eye.BackgroundImage = Properties.Resources.eye_enabled;
-                timer.Start();
                 WinAPI.PlaySound("opera.wav", UIntPtr.Zero, WinAPI.SND_ASYNC | WinAPI.SND_FILENAME);
             }
             else
             {
                 this.eye.BackgroundImage = Properties.Resources.eye_disabled;
                 WinAPI.PlaySound(null, UIntPtr.Zero, WinAPI.SND_PURGE);
-                timer.Stop();
             }
             
+        }
+
+        void openLeftGun(int percent)
+        {
+            if(percent < 0) {
+                percent = 0;
+            }
+            if(percent > 100) {
+                percent = 100;
+            }
+            int x = 39 - (int)Math.Truncate(0.39 * percent);
+            this.leftGun.Location = new Point(x, 0);
+        }
+
+        void openRightGun(int percent)
+        {
+            if (percent < 0)
+            {
+                percent = 0;
+            }
+            if (percent > 100)
+            {
+                percent = 100;
+            }
+            percent = 100 - percent;
+            int x = -(int)Math.Truncate(0.39 * percent);
+            this.rightGun.Location = new Point(x, 0);
         }
     }
 }
