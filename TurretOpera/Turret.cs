@@ -137,8 +137,11 @@ namespace TurretOpera
         {
             //Debug.WriteLine(wavBytes[t]);
             t++;
-            int data = wavBytes[t * 176375 / 5] * 100 / 255;
-            openLeftGun(data);
+            int data = wavBytes[t * 176375 / 5];
+            int left = (data % 128) * 100 / 128;
+            int right = (data >> 1) * 100 / 128;
+            openLeftGun(left);
+            openRightGun(right);
             if (t * soundTimer.Interval > wave.TotalTime.TotalMilliseconds)
             {
                 WinAPI.PlaySound(null, UIntPtr.Zero, WinAPI.SND_PURGE);
