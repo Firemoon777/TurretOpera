@@ -108,10 +108,18 @@ namespace TurretOpera
         void selfDestruct()
         {
             WinAPI.PlaySound("fizz.wav", UIntPtr.Zero, WinAPI.SND_FILENAME | WinAPI.SND_ASYNC);
+            openRightGun(0);
+            openLeftGun(0);
             prepareToRemove(head);
             prepareToRemove(leftGun);
             prepareToRemove(rightGun);
             prepareToRemove(tripod);
+
+            head.MouseDown -= Turret_MouseDown;
+            tripod.MouseDown -= Turret_MouseDown;
+            rightGun.MouseDown -= Turret_MouseDown;
+            leftGun.MouseDown -= Turret_MouseDown;
+
             eye.Hide();
             Timer selfDestructTimer = new Timer();
             selfDestructTimer.Interval = 2000;
